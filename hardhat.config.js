@@ -38,7 +38,9 @@ module.exports = {
       accounts,
     },
     polygon: {
-      url: process.env.POLYGON_RPC || "https://polygon-rpc.com",
+      url:
+        process.env.POLYGON_RPC ||
+        "https://polygon-mainnet.infura.io/v3/aa079d178e3c44bb8dd492c3f99bee77",
       chainId: 137,
       accounts,
     },

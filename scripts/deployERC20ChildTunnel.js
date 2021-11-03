@@ -7,6 +7,14 @@ async function main() {
 
   const network = await hre.ethers.provider.getNetwork();
 
+  const [owner] = await hre.ethers.getSigners();
+
+  console.log("Deploying contracts with the account:", owner.address);
+  console.log(
+    `Owner [${owner.address}] Balance:`,
+    ethers.utils.formatEther(await owner.getBalance()).toString()
+  );
+
   if (network.chainId === 137) {
     // Polygon Mainnet
     fxChild = config.mainnet.fxChild.address;

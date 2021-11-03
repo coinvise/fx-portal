@@ -18,11 +18,11 @@
     "fxERC1155": {
       "address": "0x4443c9877aB1767e1080fa70Ac038758e526c609"
     },
-    "FxERC20ChildTunnel": {
-      "address": ""
+    "fxERC20ChildTunnel": {
+      "address": "0xC0993e0df2Ec06B3A70fa30A55fe1447092558Be"
     },
-    "FxERC20RootTunnel": {
-      "address": ""
+    "fxERC20RootTunnel": {
+      "address": "0x21D43549B8995627030d4F8C277fd9E7f759a1cE"
     }
   },
   "testnet": {
