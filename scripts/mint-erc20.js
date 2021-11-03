@@ -14,7 +14,7 @@ async function main() {
     ethers.BigNumber.from(10).pow(18)
   );
 
-  const args = ["name", "sumbol", supplyInBigNumber, owner.address];
+  const args = ["Bri", "BRI", supplyInBigNumber, owner.address];
 
   const ERC20Factory = await hre.ethers.getContractFactory("ERC20Token");
   const erc20Deployed = await ERC20Factory.deploy(...args);
