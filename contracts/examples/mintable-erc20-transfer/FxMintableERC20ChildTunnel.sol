@@ -8,6 +8,9 @@ import { FxERC20Token, ERC20Token } from '../../tokens/FxERC20Token.sol';
 
 /**
  * @title FxMintableERC20ChildTunnel
+ * @notice Child tunnel contract that enables receiving ERC20 tokens bridged from root chain
+ *         and withdrawing ERC20 tokens to root chain
+ *         Also allows minting new tokens on child chain that can be bridged to root chain
  */
 contract FxMintableERC20ChildTunnel is FxBaseChildTunnel, Create2 {
     bytes32 public constant DEPOSIT = keccak256("DEPOSIT");
@@ -23,6 +26,11 @@ contract FxMintableERC20ChildTunnel is FxBaseChildTunnel, Create2 {
     // root token tempalte code hash
     bytes32 public rootTokenTemplateCodeHash;
 
+    /**
+     * @param _fxChild FxChild contract address
+     * @param _childTokenTemplate Child token template address on the child chain
+     * @param _rootTokenTemplate Root token template address on the root chain
+     */
     constructor(address _fxChild, address _childTokenTemplate, address _rootTokenTemplate) FxBaseChildTunnel(_fxChild) {
         childTokenTemplate = _childTokenTemplate;
         require(_isContract(_childTokenTemplate), "Token template is not contract");
@@ -31,6 +39,18 @@ contract FxMintableERC20ChildTunnel is FxBaseChildTunnel, Create2 {
     }
 
     // deploy child token with unique id
+    /**
+     * @notice Deploy a child token on child chain
+     * @dev Deploys and initializes a minimal clone out of the childTokenTemplate
+     *      Computes the root token create2 address
+     *      Maps the root token to the child token
+     *      Mints initialSupply amount of tokens to mintTo address
+     * @param uniqueId unique integer to be used to generate salt for the clone
+     * @param name name of the child token in child chain
+     * @param symbol symbol of the child token in child chain
+     * @param initialSupply number of tokens to be minted on initialize
+     * @param mintTo address to mint the initial supply of the child token
+     */
     function deployChildToken(uint256 uniqueId, string memory name, string memory symbol, uint256 initialSupply, address mintTo) public returns (address) {
         // deploy new child token using unique id
         bytes32 childSalt = keccak256(abi.encodePacked(uniqueId));
@@ -53,6 +73,14 @@ contract FxMintableERC20ChildTunnel is FxBaseChildTunnel, Create2 {
         return childToken;
     }
 
+    /**
+     * @notice Withdraw tokens from child chain to root chain
+     * @dev Burns child tokens in the child chain to be withdrawn
+     *      Prepares and sends message to the root tunnel contract with the token details and amount
+     *      Burnproof is to be generated from the txn hash to be used to unlock/mint the tokens on root chain
+     * @param childToken address of the child token to withdraw (bridge)
+     * @param amount number of tokens to be withdrawn (bridged)
+     */
     function withdraw(address childToken, uint256 amount) public {
         FxERC20Token childTokenContract = FxERC20Token(childToken);
         // child token contract will have root token
@@ -84,6 +112,11 @@ contract FxMintableERC20ChildTunnel is FxBaseChildTunnel, Create2 {
     // Internal functions
     //
 
+    /**
+     * @notice Processes message from root, called during checkpoint, while depositing from root chain
+     * @dev Syncs deposit or maps token depending on the message received from root
+     * @param data data passed in from the root tunnel contract
+     */
     function _processMessageFromRoot(uint256 /* stateId */, address sender, bytes memory data)
         internal
         override
@@ -102,6 +135,12 @@ contract FxMintableERC20ChildTunnel is FxBaseChildTunnel, Create2 {
         }
     }
 
+    /**
+     * @notice Map a root token to child token
+     * @dev Deploys and initialzes a minimal clone out of the childTokenTemplate
+     *      Maps the root token to the child token
+     * @param syncData data passed in from the root tunnel contract
+     */
     function _mapToken(bytes memory syncData) internal returns (address) {
         (
             address rootToken,
@@ -138,6 +177,12 @@ contract FxMintableERC20ChildTunnel is FxBaseChildTunnel, Create2 {
         return childToken;
     }
     
+    /**
+     * @notice Sync a deposit from root tunnel contract
+     * @dev Mints child token to mintTo
+     *      Calls `onTokenTranfer` on `mintTo` if it's a contract
+     * @param syncData data passed in from the root tunnel contract
+     */
     function _syncDeposit(bytes memory syncData) internal {
         (address rootToken, address depositor, address mintTo, uint256 amount, bytes memory depositData) = abi.decode(syncData, (address, address, address, uint256, bytes));
         address childToken = rootToChildToken[rootToken];

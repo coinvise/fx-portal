@@ -9,6 +9,8 @@ import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/Saf
 
 /** 
  * @title FxMintableERC20RootTunnel
+ * @notice Root tunnel contract that enables depositing ERC20 tokens on root chain
+ *         and withdrawing ERC20 tokens deployed on child chain
  */
 contract FxMintableERC20RootTunnel is FxBaseRootTunnel, Create2 {
     using SafeERC20 for IERC20;
@@ -21,6 +23,12 @@ contract FxMintableERC20RootTunnel is FxBaseRootTunnel, Create2 {
     address public rootTokenTemplate;
     bytes32 public childTokenTemplateCodeHash;
 
+    /**
+     * @param _checkpointManager Checkpoint manager contract address
+     * @param _fxRoot FxRoot contract address
+     * @param _rootTokenTemplate Root token template contract address on the root chain
+     * @param _childTokenTemplate Child token template contract address on the child chain
+     */
      constructor(address _checkpointManager, address _fxRoot, address _rootTokenTemplate, address _childTokenTemplate) FxBaseRootTunnel(_checkpointManager, _fxRoot) {
         rootTokenTemplate = _rootTokenTemplate;
         // compute child token template code hash
@@ -29,6 +37,14 @@ contract FxMintableERC20RootTunnel is FxBaseRootTunnel, Create2 {
         );
     }
 
+    /**
+     * @notice Map a root token to child token
+     * @dev Prepares and sends message to the child tunnel contract with the token details
+     *      to deploy, initialize and map the child token in child chain
+     *      Computes the child token create2 address
+     *      Maps the root token to the child token
+     * @param rootToken address of token on root chain
+     */
     function mapToken(address rootToken) public {
         // check if token is already mapped
         require(
@@ -61,6 +77,17 @@ contract FxMintableERC20RootTunnel is FxBaseRootTunnel, Create2 {
         rootToChildTokens[rootToken] = childToken;
     }
 
+    /**
+     * @notice Deposit root token to be bridged to child chain
+     * @dev Maps root token to child token, if not already done
+     *      Transfers (locks) root tokens to be bridged
+     *      Prepares and sends message to the child tunnel contract, 
+     *      to mint the deposited amount of tokens in child chain
+     * @param rootToken address of token on root chain
+     * @param mintTo address to mint the child token to on child chain
+     * @param amount number of tokens to be deposited (bridged)
+     * @param data additional data to be used to call if mintTo is a contract
+     */
     function deposit(address rootToken, address mintTo, uint256 amount, bytes memory data) public  {
         // map token if not mapped
         if (rootToChildTokens[rootToken] == address(0x0)) {
@@ -80,6 +107,12 @@ contract FxMintableERC20RootTunnel is FxBaseRootTunnel, Create2 {
     }
 
     // exit processor
+    /**
+     * @notice Processes message from child, called within receiveMessage(), while exiting from child chain
+     * @dev Deploys root token contract in root chain, if it doesn't already exist
+     *      Mints and transfers the withdrawn root tokens to the recipient, depending on the available balance
+     * @param data data passed in from the child tunnel contract
+     */
     function _processMessageFromChild(bytes memory data) internal override {
         (address rootToken, address childToken, address creator, address mintTo, uint256 amount, bytes memory metaData) = abi.decode(data, (address, address, address, address, uint256, bytes));
 
@@ -113,6 +146,15 @@ contract FxMintableERC20RootTunnel is FxBaseRootTunnel, Create2 {
         );
     }
     
+    /**
+     * @notice Deploys a root token on root chain
+     * @dev Deploys and initialzes a minimal clone out of the rootTokenTemplate
+     *      Maps the root token to the child token
+     * @param childToken address of the child token in child chain
+     * @param creator address of the creator of the child token in child chain
+     * @param name name of the child token in child chain
+     * @param symbol symbol of the child token in child chain
+     */
     function _deployRootToken(address childToken, address creator, string memory name, string memory symbol) internal returns (address) {
         // deploy new root token
         bytes32 salt = keccak256(abi.encodePacked(childToken));
