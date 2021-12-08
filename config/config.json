@@ -52,5 +52,37 @@
       "addressOld": "0x542FfB7d78D78F957895891B6798B3d60e979b64",
       "address": "0x06D95B328761a062fD200729e1C868147004bA44"
     }
+  },
+  "ethereum": {
+    "fxERC20Token": {
+      "address": ""
+    },
+    "fxMintableERC20RootTunnel": {
+      "address": ""
+    }
+  },
+  "goerli": {
+    "fxERC20Token": {
+      "address": "0xD238e687C2859A8732601D2E09898B1B3a2F7de9"
+    },
+    "fxMintableERC20RootTunnel": {
+      "address": "0x23E7E124649dA4e8f3A4bDD62EDF26d108044C13"
+    }
+  },
+  "polygon": {
+    "fxERC20Token": {
+      "address": ""
+    },
+    "fxMintableERC20ChildTunnel": {
+      "address": ""
+    }
+  },
+  "mumbai": {
+    "fxERC20Token": {
+      "address": "0xa1881a4b244FadEc2129E6Ba4A339aC659Ef5F48"
+    },
+    "fxMintableERC20ChildTunnel": {
+      "address": "0xC55dA92910C49D8042A3F17256AED6eC1C44d48b"
+    }
   }
 }
