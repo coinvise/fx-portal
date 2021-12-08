@@ -28,7 +28,7 @@ async function main() {
   const FxMintableERC20ChildTunnel = await hre.ethers.getContractAt("FxMintableERC20ChildTunnel", fxMintableERC20ChildTunnel);
 
   const setFxRootTunnel = await FxMintableERC20ChildTunnel.setFxRootTunnel(fxMintableERC20RootTunnel);
-  await setFxRootTunnel.wait(5);
+  await setFxRootTunnel.wait();
   console.log("FxRootTunnel set");
 }
 

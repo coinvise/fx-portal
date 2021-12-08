@@ -37,7 +37,7 @@ async function main() {
 
   // Withdraw
   const withdraw = await FxMintableERC20ChildTunnel.withdraw(...args);
-  const receipt = await withdraw.wait(5);
+  const receipt = await withdraw.wait();
   console.log("Burn txn block: ", receipt.blockNumber);
   console.log("Burn txn hash: ", receipt.transactionHash);
   console.log("Withdrew tokens to FxMintableERC20ChildTunnel. Use burnproof.js to generate burn proof");

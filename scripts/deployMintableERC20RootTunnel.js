@@ -48,7 +48,7 @@ async function main() {
 
   // setFxChildTunnel()
   const setFxChildTunnel = await fxMintableERC20RootTunnel.setFxChildTunnel(fxMintableERC20ChildTunnel);
-  await setFxChildTunnel.wait(5);
+  await setFxChildTunnel.wait();
   console.log("FxChildTunnel set");
 }
 

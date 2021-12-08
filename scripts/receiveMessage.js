@@ -31,7 +31,7 @@ async function main() {
 
   // receiveMessage()
   const receiveMessage = await FxMintableERC20RootTunnel.receiveMessage(burnProof);
-  await receiveMessage.wait(5);
+  await receiveMessage.wait();
   console.log("receiveMessage() complete.");
 }
 

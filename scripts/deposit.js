@@ -41,7 +41,7 @@ async function main() {
   const deposit = await FxMintableERC20RootTunnel.deposit(...args, {
     gasLimit: 250000,
   });
-  await deposit.wait(5);
+  await deposit.wait();
   console.log("Deposited tokens to FxMintableERC20RootTunnel. Check child chain txn for child token address.");
 }
 
